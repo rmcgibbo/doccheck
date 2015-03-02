@@ -29,7 +29,9 @@ def check_docstring(f):
         warnings.simplefilter('error')
         try:
             parsed = NumpyDocString(inspect.getdoc(f))
-        except ValueError:
+        except:
+            print('ERROR PARSING DOCSTRING: %s' % fullname(f))
+            print('')
             return False
 
     if len(parsed['Parameters']) == 0:
@@ -106,7 +108,11 @@ def all_callables(pkg, root_name=None):
         try:
             with warnings.catch_warnings():
                 warnings.simplefilter("ignore", category=DeprecationWarning)
-                mod = importlib.import_module(c)
+                try:
+                    mod = importlib.import_module(c)
+                except AttributeError:
+                    pass
+
             if ispkg:
                 yield from all_callables(mod, root_name)
             yield from callables_in_module(mod)
