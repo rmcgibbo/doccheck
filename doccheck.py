@@ -16,10 +16,17 @@ def main():
     args = p.parse_args()
 
     mod = importlib.import_module(args.module)
-    for item in set(all_callables(mod)):
+
+    for item in sorted(set(all_callables(mod)), key=fullname):
         m = inspect.getmodule(item)
         if m is not None and m.__name__.startswith(args.module):
             check_docstring(item)
+
+
+def fullname(f):
+    base = inspect.getmodule(f)
+    out = (base.__name__ if base is not None else '') + '.' + f.__name__
+    return out
 
 
 def check_docstring(f):
