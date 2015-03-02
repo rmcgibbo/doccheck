@@ -16,7 +16,7 @@ def main():
     args = p.parse_args()
 
     mod = importlib.import_module(args.module)
-    for item in all_callables(mod):
+    for item in set(all_callables(mod)):
         m = inspect.getmodule(item)
         if m is not None and m.__name__.startswith(args.module):
             check_docstring(item)
@@ -45,7 +45,7 @@ def check_docstring(f):
 
     try:
         argspec = inspect.getargspec(f)
-    except TypeError:
+    except TypeError as e:
         return False
 
     # ignore 'self' or 'cls' in the signature for instance methods or
@@ -62,10 +62,16 @@ def check_docstring(f):
 
     # if doc_params != args and len(parsed['Parameters']) > 0:
     if args != doc_args:
-        print('ERROR %s.%s' % (inspect.getmodule(f).__name__, f.__name__))
-        print('  Signature: ', sorted(args))
-        print('  Docs:      ', sorted(doc_args))
+        print('%s.%s ( %s )' % (
+            inspect.getmodule(f).__name__, f.__name__, inspect.getfile(f)))
 
+        undoc_args = args.difference(doc_args)
+        doc_nonargs =  doc_args.difference(args)
+        if undoc_args:
+            print('  Undocumented arguments:   ', undoc_args)
+        if doc_nonargs:
+            print('  Documented non-arguments: ', doc_nonargs)
+        print()
 
 def all_callables(pkg):
     def callables_in_module(mod):
