@@ -9,10 +9,7 @@ appear in the function signature.
 
 ### Examples
 ```
-$ doccheck scipy.linalg
-
-[ ... snip ...]
-
+$ doccheck scipy.linalg.matfuncs
 scipy.linalg.matfuncs:expm ( /Users/rmcgibbo/projects/scipy/scipy/linalg/matfuncs.py )
   Undocumented arguments:    {'q'}
 ``` 
