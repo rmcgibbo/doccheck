@@ -71,6 +71,10 @@ def all_callables(pkg):
             if inspect.isclass(obj):
                 yield from callables_in_module(obj)
 
+    if inspect.ismodule(pkg):
+        yield from callables_in_module(pkg)
+        return
+
     for _, modname, ispkg in pkgutil.iter_modules(pkg.__path__):
         if modname.startswith('_'):
             continue
