@@ -32,6 +32,13 @@ numpy.ma.extras:vander ( /Users/rmcgibbo/miniconda/envs/scipy/lib/python3.4/site
 ```
 $ pip install https://github.com/rmcgibbo/doccheck/archive/master.zip
 ```
+or 
+```
+$ git clone https://github.com/rmcgibbo/doccheck.git
+$ cd doccheck
+$ python setup.py install
+```
+
 
 ### Dependencies
 - python3.3 or later
