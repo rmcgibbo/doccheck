@@ -16,17 +16,8 @@ def main():
     args = p.parse_args()
 
     mod = importlib.import_module(args.module)
-
     for item in sorted(set(all_callables(mod)), key=fullname):
-        m = inspect.getmodule(item)
-        if m is not None and m.__name__.startswith(args.module):
-            check_docstring(item)
-
-
-def fullname(f):
-    base = inspect.getmodule(f)
-    out = (base.__name__ if base is not None else '') + '.' + f.__name__
-    return out
+        check_docstring(item)
 
 
 def check_docstring(f):
@@ -69,26 +60,35 @@ def check_docstring(f):
 
     # if doc_params != args and len(parsed['Parameters']) > 0:
     if args != doc_args:
-        print('%s.%s ( %s )' % (
-            inspect.getmodule(f).__name__, f.__name__, inspect.getfile(f)))
+        print('%s ( %s )' % (fullname(f), inspect.getfile(f)))
 
         undoc_args = args.difference(doc_args)
-        doc_nonargs =  doc_args.difference(args)
+        doc_nonargs = doc_args.difference(args)
         if undoc_args:
             print('  Undocumented arguments:   ', undoc_args)
         if doc_nonargs:
             print('  Documented non-arguments: ', doc_nonargs)
         print()
 
-def all_callables(pkg):
+
+def all_callables(pkg, root_name=None):
+    if root_name is None:
+        root_name = pkg.__name__
+
     def callables_in_module(mod):
         for name, obj in inspect.getmembers(mod):
             if name.startswith('_'):
                 continue
 
+            obj_module = inspect.getmodule(obj)
+            if obj_module is None:
+                continue
+
             isfunc = (inspect.isclass(obj) or inspect.isfunction(obj) or
                       inspect.isbuiltin(obj))
-            if isfunc and inspect.getdoc(obj) is not None:
+
+            if isfunc and inspect.getdoc(obj) is not None and \
+                    obj_module.__name__.startswith(root_name):
                 yield obj
             if inspect.isclass(obj):
                 yield from callables_in_module(obj)
@@ -108,10 +108,17 @@ def all_callables(pkg):
                 warnings.simplefilter("ignore", category=DeprecationWarning)
                 mod = importlib.import_module(c)
             if ispkg:
-                yield from all_callables(mod)
+                yield from all_callables(mod, root_name)
             yield from callables_in_module(mod)
         except ImportError as e:
             continue
+
+
+def fullname(f):
+    """A long resolved name for a callable, including its module"""
+    base = inspect.getmodule(f)
+    out = (base.__name__ if base is not None else '') + ':' + f.__name__
+    return out
 
 
 if __name__ == '__main__':
