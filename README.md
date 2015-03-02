@@ -18,7 +18,7 @@ scipy.linalg.matfuncs:expm ( /Users/rmcgibbo/projects/scipy/scipy/linalg/matfunc
 ``` 
 
 ```
-doccheck numpy.ma.extras
+$ doccheck numpy.ma.extras
 numpy.ma.extras:compress_rowcols ( /Users/rmcgibbo/miniconda/envs/scipy/lib/python3.4/site-packages/numpy/ma/extras.py )
   Undocumented arguments:    {'x'}
 
