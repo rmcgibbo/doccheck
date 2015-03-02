@@ -12,7 +12,8 @@ from numpydoc.docscrape import NumpyDocString
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument('module')
+    p.add_argument('module', help='Importable module name (e.g. "scipy", or '
+        '"scipy.linalg")')
     args = p.parse_args()
 
     mod = importlib.import_module(args.module)
