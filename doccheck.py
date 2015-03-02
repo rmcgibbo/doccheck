@@ -5,6 +5,7 @@ import argparse
 import importlib
 import pkgutil
 import inspect
+from itertools import chain
 
 from six import get_function_code, get_function_closure, PY2
 from numpydoc.docscrape import NumpyDocString
@@ -37,12 +38,16 @@ def check_docstring(f):
         return False
 
     def iter_docargs():
-        for item in parsed['Parameters']:
+        for item in chain(parsed['Parameters'], parsed['Other Parameters']):
             for rep in item[0].split(','):
                 yield rep.strip(': ')
     doc_args = set(iter_docargs())
 
-    argspec = inspect.getargspec(f)
+    try:
+        argspec = inspect.getargspec(f)
+    except TypeError:
+        return False
+
     args = set(argspec.args)
     args.discard('self')
     args.discard('cls')
@@ -73,7 +78,6 @@ def all_callables(pkg):
 
     if inspect.ismodule(pkg):
         yield from callables_in_module(pkg)
-        return
 
     for _, modname, ispkg in pkgutil.iter_modules(pkg.__path__):
         if modname.startswith('_'):
