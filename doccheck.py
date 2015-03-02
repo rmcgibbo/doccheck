@@ -1,5 +1,5 @@
-import sys
-import types
+"""Check all function docstrings in a package.
+"""
 import warnings
 import argparse
 import importlib
@@ -7,12 +7,11 @@ import pkgutil
 import inspect
 from itertools import chain
 
-from six import get_function_code, get_function_closure, PY2
 from numpydoc.docscrape import NumpyDocString
 
 
 def main():
-    p = argparse.ArgumentParser()
+    p = argparse.ArgumentParser(description=__doc__)
     p.add_argument('module')
     args = p.parse_args()
 
@@ -24,6 +23,7 @@ def main():
 
 
 def check_docstring(f):
+    # can't inspect builtins
     if inspect.isbuiltin(f):
         return False
 
@@ -40,7 +40,7 @@ def check_docstring(f):
     def iter_docargs():
         for item in chain(parsed['Parameters'], parsed['Other Parameters']):
             for rep in item[0].split(','):
-                yield rep.strip(': ')
+                yield rep.strip()
     doc_args = set(iter_docargs())
 
     try:
@@ -48,10 +48,14 @@ def check_docstring(f):
     except TypeError:
         return False
 
+    # ignore 'self' or 'cls' in the signature for instance methods or
+    # class methods.
     args = set(argspec.args)
-    args.discard('self')
     args.discard('cls')
+    args.discard('self')
 
+    # the docstring might legitimately mention parameters that aren't in
+    # the signature if the function takes *args, or **kwargs
     if args != doc_args and len(doc_args) > len(args) and (
             (argspec.varargs is not None) or (argspec.keywords is not None)):
         return False
@@ -78,6 +82,9 @@ def all_callables(pkg):
 
     if inspect.ismodule(pkg):
         yield from callables_in_module(pkg)
+
+    if not hasattr(pkg, '__path__'):
+        return
 
     for _, modname, ispkg in pkgutil.iter_modules(pkg.__path__):
         if modname.startswith('_'):
