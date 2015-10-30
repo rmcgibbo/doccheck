@@ -124,7 +124,7 @@ def all_callables(pkg, root_name=None):
 def fullname(f):
     """A long resolved name for a callable, including its module"""
     base = inspect.getmodule(f)
-    out = (base.__name__ if base is not None else '') + ':' + f.__name__
+    out = (base.__name__ if base is not None else '') + '.' + f.__qualname__
     return out
 
 
