@@ -30,8 +30,8 @@ def check_docstring(f):
         warnings.simplefilter('error')
         try:
             parsed = NumpyDocString(inspect.getdoc(f))
-        except:
-            print('ERROR PARSING DOCSTRING: %s' % fullname(f))
+        except UserWarning as err:
+            print('{}: {}'.format(err, fullname(f)))
             print('')
             return False
 
