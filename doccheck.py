@@ -45,7 +45,7 @@ def check_docstring(f):
     doc_args = set(iter_docargs())
 
     try:
-        argspec = inspect.getargspec(f)
+        argspec = inspect.getfullargspec(f)
     except TypeError as e:
         return False
 
@@ -58,7 +58,7 @@ def check_docstring(f):
     # the docstring might legitimately mention parameters that aren't in
     # the signature if the function takes *args, or **kwargs
     if args != doc_args and len(doc_args) > len(args) and (
-            (argspec.varargs is not None) or (argspec.keywords is not None)):
+            (argspec.varargs is not None) or (argspec.varkw is not None)):
         return False
 
     # if doc_params != args and len(parsed['Parameters']) > 0:
